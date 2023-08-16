@@ -14,6 +14,12 @@ class ViewController: UIViewController {
     @IBOutlet weak var underlineDoors: UIView!
     @IBOutlet weak var collectionView: UICollectionView!
     
+    let myRefreshControl: UIRefreshControl = {
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(nil, action: #selector(refresh(sender:)), for: .valueChanged)
+        return refreshControl
+    }()
+    
     var dataSource: UICollectionViewDiffableDataSource<MSection, MItem>?
     var changeData = true
     var networkManager = NetworkManager()
@@ -33,7 +39,7 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        collectionView.refreshControl = myRefreshControl
         realmItems = realm.objects(Cameras.self)
         
         if realmItems.count != 0 {
@@ -80,9 +86,6 @@ class ViewController: UIViewController {
                     action2.backgroundColor = .white
                     action2.image = UIImage(named: "edit")
                     
-                    
-
-
                     return UISwipeActionsConfiguration(actions: [action1, action2])
                 }
                 return UISwipeActionsConfiguration(actions: [action1])
@@ -306,6 +309,72 @@ extension ViewController {
             
         default:
             print("")
+        }
+    }
+}
+
+// MARK: - Refresh
+extension ViewController {
+    @objc private func refresh(sender: UIRefreshControl) {
+        group.enter()
+        getCams()
+
+        group.enter()
+        getDoors()
+        
+        group.notify(queue: .main) {
+            self.sections = []
+            if self.changeData == true {
+                self.group.enter()
+
+                self.sections1 = []
+                self.getCams()
+                
+                let itemsRealm = Cameras()
+                
+                var items: [MItem] = []
+                var roomName: String = ""
+                if let cameras = self.cam?.data?.cameras {
+                    for i in cameras {
+                        items.append(MItem(snapshot: i.snapshot ?? "", name: i.name ?? "", room: i.room ?? "", favorites: i.favorites ?? false, rec: i.rec ?? false))
+                        itemsRealm.items.append(Item(value: [i.snapshot ?? "", i.name ?? "", i.room ?? "", i.favorites ?? false, i.rec ?? false] as [Any]))
+                        if let room = i.room {
+                            roomName = room
+                            itemsRealm.room = roomName
+                        }
+                    }
+                }
+                self.sections1.append(MSection(type: "First", title: roomName, items: items))
+                
+                
+                self.sections.append(contentsOf: self.sections1)
+                self.reloadData()
+                
+            } else {
+                self.group.enter()
+                self.sections2 = []
+                self.getDoors()
+                
+                let itemsRealm = Cameras()
+                var items2: [MItem] = []
+                if let doorData = self.door?.data {
+                    for i in doorData {
+                        items2.append(MItem(snapshot: i.snapshot ?? "", name: i.name ?? "", room: "", favorites: i.favorites ?? false, rec: false))
+                        itemsRealm.items2.append(Item(value: [i.snapshot ?? "", i.name ?? "", i.room ?? "", i.favorites ?? false, false] as [Any]))
+                    }
+                }
+
+                try! self.realm.write {
+                    self.realm.add(itemsRealm)
+                }
+                
+                self.sections2.append(MSection(type: "Second", title: "", items: items2))
+                
+                
+                self.sections.append(contentsOf: self.sections2)
+                self.reloadData()
+            }
+            sender.endRefreshing()
         }
     }
 }
