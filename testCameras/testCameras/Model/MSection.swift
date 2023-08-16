@@ -10,5 +10,5 @@ import UIKit
 struct MSection: Hashable {
     let type: String
     let title: String
-    let items: [MItem]
+    var items: [MItem]
 }

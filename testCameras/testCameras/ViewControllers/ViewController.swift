@@ -69,10 +69,18 @@ class ViewController: UIViewController {
                 
                 if changeData == false {
                     let action2 = UIContextualAction(style: .normal, title: "") { (action, view, completion) in
+                        try! self.realm.write {
+                            self.realmItems[0].items2[indexPath.item].name = "\(self.realmItems[0].items2[indexPath.item].name) + new"
+                        }
+                        self.sections2[0].items[indexPath.item].name = "\(self.sections2[0].items[indexPath.item].name) + new"
+                        self.sections[0].items[indexPath.item].name = "\(self.sections[0].items[indexPath.item].name) + new"
+                        self.reloadData()
                         completion(true)
                     }
                     action2.backgroundColor = .white
                     action2.image = UIImage(named: "edit")
+                    
+                    
 
 
                     return UISwipeActionsConfiguration(actions: [action1, action2])

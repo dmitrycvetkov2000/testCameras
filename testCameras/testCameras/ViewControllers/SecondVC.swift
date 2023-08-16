@@ -17,5 +17,7 @@ class SecondVC: UIViewController {
         super.viewDidLoad()
         button.layer.cornerRadius = 20
         imageView.image = image
+        
+        self.navigationController?.navigationBar.isHidden = true
     }
 }
