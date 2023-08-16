@@ -8,7 +8,16 @@
 import UIKit
 
 class SheetVC: UIViewController {
+    
+    weak var secondVC: SecondVC?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
     }
+    
+    @IBAction func goToRoot(_ sender: Any) {
+        dismiss(animated: true)
+        secondVC?.navigationController?.popToRootViewController(animated: true)
+    }
+    
 }

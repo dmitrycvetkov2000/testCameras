@@ -251,6 +251,7 @@ extension ViewController {
         viewController?.modalPresentationStyle = .fullScreen
         
         viewController?.image = image
+        sheetViewController?.secondVC = viewController
         
         if let sheet = sheetViewController?.sheetPresentationController {
             sheet.detents = [.custom(resolver: { context in
@@ -259,7 +260,7 @@ extension ViewController {
             sheet.largestUndimmedDetentIdentifier = .large
         }
     
-        self.navigationController?.present(viewController ?? UIViewController(), animated: true)
+        self.navigationController?.pushViewController(viewController ?? UIViewController(), animated: true)
         viewController?.present(sheetViewController ?? UIViewController(), animated: true)
     }
 }
